@@ -10,9 +10,9 @@ part 'login_event.dart';
 part 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  final LoginRepository _loginRepository = LoginRepository();
+  final LoginRepository loginRepository;
 
-  LoginBloc() : super(LoginInitial()) {
+  LoginBloc(this.loginRepository) : super(LoginInitial()) {
     on<LoginSubmitted>(loginSubmitted);
     on<EmailChanged>(emailChanged);
     on<PasswordChanged>(passwordChanged);
@@ -24,7 +24,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         CustomValidations().passwordValidation(state.password) == null) {
       emit(Loading(
           state.email, state.password, state.enableButton, state.showError));
-      final result = await _loginRepository.login(state.email, state.password);
+      final result = await loginRepository.login(state.email, state.password);
       result.fold(
           (data) => emit(LoginSuccess()),
           (exception) => emit(LoginError(state.email, state.password,
