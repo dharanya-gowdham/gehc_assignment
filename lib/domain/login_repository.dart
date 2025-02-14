@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
-import 'package:gehc_assignment/core/secure_storage.dart';
 import 'package:gehc_assignment/data_source/login_service.dart';
+
+import '../core/secure_storage.dart';
 
 abstract class LoginRepository {
   Future<Either<bool, String>> login(String email, String password);
@@ -9,7 +9,9 @@ abstract class LoginRepository {
 
 class LoginRepositoryImpl implements LoginRepository {
   final LoginService loginService;
-  LoginRepositoryImpl(this.loginService);
+  final SecureStorage secureStorage;
+
+  LoginRepositoryImpl(this.loginService, this.secureStorage);
 
   @override
   Future<Either<bool, String>> login(String email, String password) async {
@@ -17,7 +19,7 @@ class LoginRepositoryImpl implements LoginRepository {
     return result.fold(
       (data) async {
         final accessToken = data["accessToken"];
-        await SecureStorage().storeAccessToken(accessToken);
+        await secureStorage.storeAccessToken(accessToken);
         return Left(true);
       },
       (exception) => Right(exception.toString()),

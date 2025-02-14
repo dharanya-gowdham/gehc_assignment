@@ -1,9 +1,16 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class SecureStorage {
-  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+abstract class SecureStorage {
+  Future<void>? storeAccessToken(String token);
+}
 
-  Future<void> storeAccessToken(String token) async {
-    await _secureStorage.write(key: 'accessToken', value: token);
+class SecureStorageImpl implements SecureStorage {
+
+  final FlutterSecureStorage secureStorage;
+  SecureStorageImpl(this.secureStorage);
+
+  @override
+  Future<void>? storeAccessToken(String token) async {
+    await secureStorage.write(key: 'accessToken', value: token);
   }
 }

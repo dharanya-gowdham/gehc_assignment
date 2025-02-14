@@ -29,7 +29,6 @@ void main() {
           "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
         };
 
-        // Arrange
         when(mockDio.post(
           ApiUrls.loginApi,
           data: {
@@ -42,20 +41,45 @@ void main() {
           requestOptions: requestOptions,
         ));
 
-        // Act
         final result = await loginServiceImpl.login(email, password);
 
-        // Assert
         expect(result.isLeft(), isTrue);
         expect(result.fold((data) => data, (error) => null), responseData);
       });
 
-      test('login returns exception on failure', () async {
+
+    test('login returns authorization data on success', () async{
+      const email = 'emilys@example.com';
+      const password = 'Emily@123';
+      final responseData = {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      };
+
+      when(mockDio.post(
+        ApiUrls.loginApi,
+        data: {
+          'username': 'emilys',
+          'password': 'emilyspass',
+        },
+      )).thenAnswer((_) async => Response(
+        data: responseData,
+        statusCode: 200,
+        requestOptions: requestOptions,
+      ));
+
+      final result = await loginServiceImpl.login(email, password);
+
+      expect(result.isLeft(), isTrue);
+      expect(result.fold((data) => data, (error) => null), responseData);
+    });
+
+
+    test('login returns exception on failure', () async {
         const email = 'test@example.com';
         const password = 'Test@123';
         final errorMessage = {'message': 'Invalid credentials'};
 
-        // Arrange
         when(mockDio.post(
           'https://dummyjson.com/auth/login',
           data: {
@@ -68,10 +92,8 @@ void main() {
           requestOptions: requestOptions
         ));
 
-        // Act
         final result = await loginServiceImpl.login(email, password);
 
-        // Assert
         expect(result.isRight(), isTrue);
         expect(result.fold((data) => null, (error) => error.toString()),
             contains('Invalid credentials'));
@@ -82,7 +104,6 @@ void main() {
         const password = 'password';
         final exceptionMessage = 'Network error';
 
-        // Arrange
         when(mockDio.post(
           'https://dummyjson.com/auth/login',
           data: {
@@ -94,10 +115,8 @@ void main() {
           error: exceptionMessage,
         ));
 
-        // Act
         final result = await loginServiceImpl.login(email, password);
 
-        // Assert
         expect(result.isRight(), isTrue);
         expect(result.fold((data) => null, (error) => error.toString()),
             contains(exceptionMessage));
