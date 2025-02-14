@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:gehc_assignment/data_source/login_service.dart';
 
-import '../core/secure_storage.dart';
+import '../data_source/secure_storage.dart';
 
 abstract class LoginRepository {
   Future<Either<bool, String>> login(String email, String password);
