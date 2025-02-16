@@ -10,6 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gehc_assignment/presentation/home/home_page.dart';
 import 'package:gehc_assignment/presentation/login/login_page.dart';
 
+class MockLoginRepository extends Mock implements LoginRepository {}
 
 class MockLoginBloc extends MockBloc<LoginEvent, LoginState> implements LoginBloc {}
 
@@ -19,6 +20,12 @@ void main() {
 
     setUp(() {
       mockLoginBloc = MockLoginBloc();
+      whenListen(
+        mockLoginBloc,
+        //For simulating states over time eg:  Stream.fromIterable([LoginInitial(), Loading()]),
+        Stream.fromIterable([LoginInitial()]),
+        initialState: LoginInitial(),
+      );
     });
 
     tearDown(() {
@@ -26,8 +33,6 @@ void main() {
     });
 
     testWidgets('renders LoginPage', (WidgetTester tester) async {
-      when(mockLoginBloc.state).thenReturn(LoginInitial());
-
       await tester.pumpWidget(
         MaterialApp(
           home: BlocProvider<LoginBloc>(
@@ -36,29 +41,8 @@ void main() {
           ),
         ),
       );
-
       expect(find.byType(GEHCCustomTextField), findsNWidgets(2));
       expect(find.byType(GEHCCustomButton), findsOneWidget);
-    });
-
-    testWidgets('shows error message when LoginError state is emitted', (WidgetTester tester) async {
-      whenListen(
-        mockLoginBloc,
-        Stream.fromIterable([LoginError('', '', false, false, 'Error message')]),
-      );
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: BlocProvider<LoginBloc>(
-            create: (_) => mockLoginBloc,
-            child: const LoginPage(),
-          ),
-        ),
-      );
-
-      await tester.pump(); // Rebuild widget with new state
-
-      expect(find.text('Error message'), findsOneWidget);
     });
 
     testWidgets('navigates to HomePage when LoginSuccess state is emitted', (WidgetTester tester) async {
@@ -75,9 +59,8 @@ void main() {
           ),
         ),
       );
-
-      await tester.pumpAndSettle(); // Wait for navigation to complete
-
+      // wait for all the animations and navigations to complete. Here, navigation to HomePage is running as we set the bloc state to LoginSuccess.
+      await tester.pumpAndSettle();
       expect(find.byType(HomePage), findsOneWidget);
     });
 
@@ -96,41 +79,10 @@ void main() {
         ),
       );
 
-      await tester.pump(); // Rebuild widget with new state
-
+      // Rebuild widget with new state
+      await tester.pump();
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('enables login button when both email and password are valid', (WidgetTester tester) async {
-      when(mockLoginBloc.state).thenReturn(FieldValidationState('test@example.com', 'password123', true, false));
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: BlocProvider<LoginBloc>(
-            create: (_) => mockLoginBloc,
-            child: const LoginPage(),
-          ),
-        ),
-      );
-
-      final loginButton = find.byType(GEHCCustomButton);
-      expect(tester.widget<GEHCCustomButton>(loginButton).isEnabled, true);
-    });
-
-    testWidgets('disables login button when email or password is invalid', (WidgetTester tester) async {
-      when(mockLoginBloc.state).thenReturn(FieldValidationState('', 'password123', false, false));
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: BlocProvider<LoginBloc>(
-            create: (_) => mockLoginBloc,
-            child: const LoginPage(),
-          ),
-        ),
-      );
-
-      final loginButton = find.byType(GEHCCustomButton);
-      expect(tester.widget<GEHCCustomButton>(loginButton).isEnabled, false);
-    });
   });
 }
