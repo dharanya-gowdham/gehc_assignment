@@ -43,6 +43,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               children: [
                 GEHCCustomTextField(
+                  key: ValueKey('email'),
                   controller: emailController,
                   labelText: 'Email',
                   fieldType: FieldType.email,
@@ -53,6 +54,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 SizedBox(height: 20),
                 GEHCCustomTextField(
+                  key: ValueKey(FieldType.password),
                   controller: passwordController,
                   labelText: 'Password',
                   fieldType: FieldType.password,

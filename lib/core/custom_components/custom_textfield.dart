@@ -12,7 +12,7 @@ class GEHCCustomTextField extends StatefulWidget {
   final ValueChanged<String>? onChanged;
 
   const GEHCCustomTextField({
-    super.key,
+    Key? key,
     required this.controller,
     required this.labelText,
     required this.fieldType,
@@ -48,6 +48,7 @@ class _GEHCCustomTextFieldState extends State<GEHCCustomTextField> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      key: widget.key,
       controller: widget.controller,
       obscureText:
           widget.fieldType == FieldType.password ? _obscureText : false,

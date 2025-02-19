@@ -10,9 +10,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gehc_assignment/presentation/home/home_page.dart';
 import 'package:gehc_assignment/presentation/login/login_page.dart';
 
+
 class MockLoginRepository extends Mock implements LoginRepository {}
 
-class MockLoginBloc extends MockBloc<LoginEvent, LoginState> implements LoginBloc {}
+class MockLoginBloc extends MockBloc<LoginEvent, LoginState>
+    implements LoginBloc {}
 
 void main() {
   group('LoginPage', () {
@@ -45,7 +47,8 @@ void main() {
       expect(find.byType(GEHCCustomButton), findsOneWidget);
     });
 
-    testWidgets('navigates to HomePage when LoginSuccess state is emitted', (WidgetTester tester) async {
+    testWidgets('navigates to HomePage when LoginSuccess state is emitted',
+        (WidgetTester tester) async {
       whenListen(
         mockLoginBloc,
         Stream.fromIterable([LoginSuccess()]),
@@ -64,7 +67,27 @@ void main() {
       expect(find.byType(HomePage), findsOneWidget);
     });
 
-    testWidgets('shows loading overlay when Loading state is emitted', (WidgetTester tester) async {
+    testWidgets('shows snack bar when LoginError state is emitted',
+        (WidgetTester tester) async {
+      whenListen(
+          mockLoginBloc,
+          Stream.fromIterable([
+            LoginError(
+                'email@example.com', "Password@123", true, true, "Login failed")
+          ]));
+      await tester.pumpWidget(MaterialApp(
+        home: BlocProvider<LoginBloc>(
+          create: (_) => mockLoginBloc,
+          child: const LoginPage(),
+        ),
+      ));
+
+     await  tester.pump();
+     expect(find.text('Login failed'), findsOneWidget);
+    });
+
+    testWidgets('shows loading overlay when Loading state is emitted',
+        (WidgetTester tester) async {
       whenListen(
         mockLoginBloc,
         Stream.fromIterable([Loading('', '', false, false)]),
@@ -83,6 +106,26 @@ void main() {
       await tester.pump();
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
+    
+    testWidgets('adds EmailChanged event when email text field is changed', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BlocProvider<LoginBloc>(
+            create: (_) => mockLoginBloc,
+            child: const LoginPage(),
+          ),
+        ),
+      );
 
+      await tester.pumpAndSettle();
+
+      final emailField = find.byType(GEHCCustomTextField).first;
+      await tester.enterText(emailField, 'email@example.com');
+
+      verify(mockLoginBloc.add(EmailChanged('email@example.com'))).called(1);
+    });
   });
 }
+
+
+
